@@ -20,7 +20,10 @@ inline std::string get_profiler_artifacts_dir() {
         artifacts_dir = std::string(std::getenv("TT_METAL_PROFILER_DIR")) + "/";
     } else {
         std::string prefix;
-        if (std::getenv("TT_METAL_HOME")) {
+        // Prefer TT_METAL_OUTPUT_DIR for runtime-generated files, fall back to TT_METAL_HOME
+        if (std::getenv("TT_METAL_OUTPUT_DIR")) {
+            prefix = std::string(std::getenv("TT_METAL_OUTPUT_DIR")) + "/";
+        } else if (std::getenv("TT_METAL_HOME")) {
             prefix = std::string(std::getenv("TT_METAL_HOME")) + "/";
         }
         artifacts_dir = prefix + std::string(PROFILER_RUNTIME_ROOT_DIR);

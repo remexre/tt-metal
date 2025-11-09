@@ -12,7 +12,7 @@ namespace detail {
 inline const std::string& get_reports_dir() {
     static std::string outpath;
     if (outpath.empty()) {
-        outpath = tt::tt_metal::MetalContext::instance().rtoptions().get_root_dir() + "/generated/reports/";
+        outpath = tt::tt_metal::MetalContext::instance().rtoptions().get_output_dir() + "/generated/reports/";
     }
     return outpath;
 }

@@ -32,6 +32,7 @@ const char* RunTimeDebugFeatureNames[RunTimeDebugFeatureCount] = {
 const char* RunTimeDebugClassNames[RunTimeDebugClassCount] = {"N/A", "worker", "dispatch", "all"};
 
 constexpr auto TT_METAL_HOME_ENV_VAR = "TT_METAL_HOME";
+constexpr auto TT_METAL_OUTPUT_DIR_ENV_VAR = "TT_METAL_OUTPUT_DIR";
 constexpr auto TT_METAL_KERNEL_PATH_ENV_VAR = "TT_METAL_KERNEL_PATH";
 // Set this var to change the cache dir.
 constexpr auto TT_METAL_CACHE_ENV_VAR = "TT_METAL_CACHE";
@@ -55,6 +56,23 @@ RunTimeOptions::RunTimeOptions() {
         std::filesystem::path p(root_dir);
         p /= "";  // ensures trailing slash, never duplicates
         this->root_dir = p.string();
+    }
+
+    // Check if user has specified an output directory (for runtime-generated files).
+    // Defaults to root_dir if not specified.
+    const char* output_dir_str = std::getenv(TT_METAL_OUTPUT_DIR_ENV_VAR);
+    if (output_dir_str != nullptr) {
+        this->is_output_dir_set = true;
+        this->output_dir = std::string(output_dir_str);
+    } else {
+        this->is_output_dir_set = true;
+        this->output_dir = this->root_dir;
+    }
+
+    if (!this->output_dir.empty()) {
+        std::filesystem::path p(output_dir);
+        p /= "";  // ensures trailing slash, never duplicates
+        this->output_dir = p.string();
     }
 
     // Check if user has specified a cache path.
@@ -303,6 +321,14 @@ const std::string& RunTimeOptions::get_root_dir() const {
     return root_dir;
 }
 
+const std::string& RunTimeOptions::get_output_dir() const {
+    if (!this->is_output_dir_specified()) {
+        TT_THROW("Output Directory is unspecified.");
+    }
+
+    return output_dir;
+}
+
 const std::string& RunTimeOptions::get_cache_dir() const {
     if (!this->is_cache_dir_specified()) {
         TT_THROW("Env var {} is not set.", TT_METAL_CACHE_ENV_VAR);
@@ -398,8 +424,8 @@ void RunTimeOptions::ParseInspectorEnv() {
     const char* inspector_log_path_str = getenv("TT_METAL_INSPECTOR_LOG_PATH");
     if (inspector_log_path_str != nullptr) {
         inspector_settings.log_path = std::filesystem::path(inspector_log_path_str);
-    } else if (this->is_root_dir_specified()) {
-        inspector_settings.log_path = std::filesystem::path(get_root_dir()) / "generated/inspector";
+    } else if (this->is_output_dir_specified()) {
+        inspector_settings.log_path = std::filesystem::path(get_output_dir()) / "generated/inspector";
     } else {
         inspector_settings.log_path = std::filesystem::temp_directory_path() / "tt-metal" / "inspector";
         std::filesystem::create_directories(inspector_settings.log_path);

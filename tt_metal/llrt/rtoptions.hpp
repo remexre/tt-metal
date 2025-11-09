@@ -98,6 +98,9 @@ class RunTimeOptions {
     bool is_root_dir_set = false;
     std::string root_dir;
 
+    bool is_output_dir_set = false;
+    std::string output_dir;
+
     bool is_cache_dir_env_var_set = false;
     std::string cache_dir_;
 
@@ -225,6 +228,9 @@ public:
     bool is_root_dir_specified() const { return this->is_root_dir_set; }
     static void set_root_dir(const std::string& root_dir);
     const std::string& get_root_dir() const;
+
+    bool is_output_dir_specified() const { return this->is_output_dir_set; }
+    const std::string& get_output_dir() const;
 
     bool is_cache_dir_specified() const { return this->is_cache_dir_env_var_set; }
     const std::string& get_cache_dir() const;
