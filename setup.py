@@ -37,7 +37,8 @@ def get_lib_dir() -> str:
     if platform.system() == "Linux":
         # skip lib64 on Debian/Arch/Alpine
         if not (
-            Path("/etc/debian_version").exists()
+            len(os.getenv("SKIP_LIB64", "")) != ""
+            or Path("/etc/debian_version").exists()
             or Path("/etc/arch-release").exists()
             or Path("/etc/alpine-release").exists()
         ):
